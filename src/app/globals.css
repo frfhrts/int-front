@@ -25,3 +25,41 @@ body {
     text-wrap: balance;
   }
 }
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: white;
+  color: black;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.description {
+  font-size: 0.8rem;
+  span {
+    font-weight: bold;
+  }
+}
+
+.button-text {
+  border: 1px solid white;
+  padding: 0.6rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  position: absolute;
+  bottom: 16px;
+  white-space: nowrap;
+  width: 30%;
+  text-align: center;
+}

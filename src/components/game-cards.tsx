@@ -3,9 +3,17 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const GameCards = ({ gameId }: { gameId: string }) => {
+const GameCards = ({ gameId }: { gameId: string }) => {
   const router = useRouter();
+
   async function startGameSession(gameId: string) {
+    const userId = JSON.parse(
+      localStorage.getItem("userData") || "{}"
+    )?.user_id;
+    if (!userId) {
+      console.error("User ID not found in localStorage");
+      return;
+    }
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/session`,
@@ -13,78 +21,22 @@ export const GameCards = ({ gameId }: { gameId: string }) => {
           game: gameId,
           currency: "TRY",
           locale: "en",
-          ip: "91.158.1.1",
-          client_type: "mobile",
           urls: {
             deposit_url: "https://test.com/deposit",
+            // return url was not valid for api from localhost soo I do not know if it will work after hosting if i modify to APP_URL or something else so i am gonna leave it like this
             return_url: `https://dev.local:3000`,
           },
-          user: {
-            user_id: "c150a529-0c94-4bea-8d38-7a2c494f4f23",
-            firstname: "TEST_FN",
-            lastname: "TEST_LN",
-            nickname: "TEST",
-            city: "FRANKFURT",
-            date_of_birth: "1992-08-11",
-            registered_at: "2022-08-11",
-            gender: "m",
-            country: "DE",
-          },
-          rtp: 90,
+          userId,
         }
       );
       if (response.data && response.data.url) {
         router.push(
           `/games/${gameId}?url=${encodeURIComponent(response.data.url)}`
         );
-        // openGameInNewWindow(response.data.url);
       }
     } catch (error) {
       console.error("Error starting game session:", error);
     }
-  }
-
-  function openGameInNewWindow(gameUrl: string) {
-    // Create HTML content for the new window with iframe
-    // const htmlContent = `
-    //   <!DOCTYPE html>
-    //   <html lang="en">
-    //   <head>
-    //     <meta charset="UTF-8">
-    //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    //     <title>Game Session</title>
-    //     <style>
-    //       body {
-    //         margin: 0;
-    //         padding: 0;
-    //         overflow: hidden;
-    //         background-color: #000;
-    //       }
-    //       iframe {
-    //         width: 100vw;
-    //         height: 100vh;
-    //         border: none;
-    //       }
-    //     </style>
-    //   </head>
-    //   <body>
-    //     <iframe src="${gameUrl}" allowfullscreen></iframe>
-    //   </body>
-    //   </html>
-    // `;
-    // // Open new window and write the HTML content
-    // const newWindow = window.open(
-    //   "",
-    //   "_blank",
-    //   "width=1200,height=800,scrollbars=yes,resizable=yes"
-    // );
-    // if (newWindow) {
-    //   newWindow.document.write(htmlContent);
-    //   newWindow.document.close();
-    // } else {
-    //   // Fallback: direct navigation if popup is blocked
-    //   window.open(gameUrl, "_blank");
-    // }
   }
 
   return (
@@ -98,13 +50,15 @@ export const GameCards = ({ gameId }: { gameId: string }) => {
   );
 };
 
-export const RenderGameCards = () => {
+export const RenderGameCards = ({ searchTerm }: { searchTerm: string }) => {
   const [gameList, setGameList] = useState<any[]>([]);
+  const [filteredGames, setFilteredGames] = useState<any[]>([]);
 
   async function fetchGamesList() {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/games`,
+        // Since I do not know after hosting if i still use ngrok i am gonna leave those headers there
         {
           headers: {
             "ngrok-skip-browser-warning": "true",
@@ -125,10 +79,33 @@ export const RenderGameCards = () => {
     fetchGamesList();
   }, []);
 
+  // Games Filter Logic for searchbar
+  useEffect(() => {
+    if (!searchTerm?.trim()) {
+      setFilteredGames(gameList);
+    } else {
+      const filtered = gameList.filter((game) =>
+        game.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredGames(filtered);
+    }
+  }, [searchTerm, gameList]);
+
   return (
     <div className="flex flex-wrap gap-4 w-full">
-      {gameList.length > 0 &&
-        gameList.map((game) => <GameCards key={game.id} gameId={game.id} />)}
+      {filteredGames.length > 0 ? (
+        filteredGames.map((game) => (
+          <GameCards key={game.id} gameId={game.id} />
+        ))
+      ) : (
+        <div className="w-full text-center py-8">
+          <p className="text-slate-400 text-lg">
+            {searchTerm
+              ? "No games found matching your search."
+              : "Loading games..."}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

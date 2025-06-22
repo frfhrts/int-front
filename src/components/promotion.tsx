@@ -24,7 +24,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
   imageAlt,
 }) => {
   return (
-    <div className="flex h-[220px] bg-slate-800 p-4 rounded-lg shadow-lg flex-col md:flex-row gap-4 relative color-[#2596be]">
+    <div className="flex h-[220px] flex-1 bg-slate-800 p-4 rounded-lg shadow-lg flex-col md:flex-row gap-4 relative color-[#2596be]">
       <div className="text-section">
         <div className="badge">{badge}</div>
         <h3 className="title">{title}</h3>
@@ -47,6 +47,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
   );
 };
 
+// I have hardcoded values for promotions because there was no API for that
 const StakeRacesHero = () => {
   const heroCards = [
     {
@@ -91,14 +92,10 @@ const StakeRacesHero = () => {
   ];
 
   return (
-    <div className="flex justify-between overflow-x-auto gap-4 pt-4 bg-slate-900">
-      {/* <div className=""> */}
-      {/* <div className=""> */}
+    <div className="flex flex-wrap -justify-between overflow-x-auto gap-2 pt-4 bg-slate-900">
       {heroCards.map((card, index) => (
         <HeroCard key={index} {...card} />
       ))}
-      {/* </div> */}
-      {/* </div> */}
     </div>
   );
 };
